@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HARTA KARUN AL & REY - Petualangan Lautan 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HARTA KARUN AL & REY - Petualangan Lautan 3D (16:9)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,6 +11,7 @@
         * {
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
             box-sizing: border-box;
         }
         body, html {
@@ -19,12 +20,40 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #062135;
+            background-color: #030f1a;
             font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .font-pirate {
             font-family: 'Cinzel', serif;
         }
+
+        /* Kontainer Utama Rasio Presisi 16:9 */
+        #viewport-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #062135 0%, #020b12 100%);
+            overflow: hidden;
+        }
+
+        #game-stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: calc(100vh * (16 / 9));
+            max-height: calc(100vw * (9 / 16));
+            aspect-ratio: 16 / 9;
+            background-color: #062135;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(197, 155, 39, 0.35);
+        }
+
         #game-canvas {
             position: absolute;
             top: 0;
@@ -34,6 +63,7 @@
             z-index: 1;
             display: block;
         }
+
         .hud-layer {
             position: absolute;
             top: 0;
@@ -43,20 +73,22 @@
             z-index: 10;
             pointer-events: none;
         }
+
         .interactive-ui {
             pointer-events: auto;
         }
+
         /* Gaya Panel Kayu & Emas Klasik */
         .wood-panel {
             background: linear-gradient(145deg, rgba(44, 27, 16, 0.92), rgba(28, 16, 9, 0.95));
-            border: 2px solid #c59b27;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 225, 130, 0.35);
+            border: 1.5px solid #c59b27;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 225, 130, 0.35);
             color: #fef3c7;
         }
         .gold-button {
             background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
-            border: 2px solid #fde68a;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.5), inset 0 2px 2px rgba(255,255,255,0.4);
+            border: 1.5px solid #fde68a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1.5px 1.5px rgba(255,255,255,0.4);
             color: #fffbeb;
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
             transition: transform 0.12s ease, filter 0.12s ease;
@@ -65,12 +97,13 @@
             filter: brightness(1.1);
         }
         .gold-button:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
         }
-        /* Joystick Virtual */
+
+        /* Joystick Virtual Proporsional 16:9 */
         #joystick-zone {
-            width: 136px;
-            height: 136px;
+            width: clamp(82px, 16vh, 132px);
+            height: clamp(82px, 16vh, 132px);
             border-radius: 50%;
             background: radial-gradient(circle, rgba(28, 16, 9, 0.6) 0%, rgba(44, 27, 16, 0.85) 100%);
             border: 2px solid rgba(197, 155, 39, 0.8);
@@ -79,8 +112,8 @@
             touch-action: none;
         }
         #joystick-knob {
-            width: 56px;
-            height: 56px;
+            width: clamp(34px, 6.8vh, 54px);
+            height: clamp(34px, 6.8vh, 54px);
             border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #fbbf24, #92400e);
             border: 2px solid #fef3c7;
@@ -91,38 +124,41 @@
             transform: translate(-50%, -50%);
             pointer-events: none;
         }
-        /* Minimap */
+
+        /* Minimap Proporsional 16:9 */
         #minimap-container {
-            width: 155px;
-            height: 155px;
+            width: clamp(76px, 15vh, 145px);
+            height: clamp(76px, 15vh, 145px);
             border-radius: 50%;
-            border: 3px solid #c59b27;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.75), inset 0 0 18px rgba(0,0,0,0.8);
+            border: 2.5px solid #c59b27;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.75), inset 0 0 15px rgba(0,0,0,0.8);
             overflow: hidden;
             position: relative;
             background: #0a3c59;
         }
-        @media (max-width: 640px) {
-            #minimap-container {
-                width: 120px;
-                height: 120px;
-            }
-            #joystick-zone {
-                width: 118px;
-                height: 118px;
-            }
-            #joystick-knob {
-                width: 48px;
-                height: 48px;
-            }
-        }
-        /* AnimasiKilau */
+
+        /* Animasi Kilau & Kompas Loading */
         @keyframes pulseGlow {
             0%, 100% { filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6)); }
             50% { filter: drop-shadow(0 0 18px rgba(251, 191, 36, 1)); }
         }
         .title-glow {
             animation: pulseGlow 3s infinite;
+        }
+        @keyframes spinSlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .compass-spin {
+            animation: spinSlow 6s linear infinite;
+        }
+        @keyframes phoneRotateAnim {
+            0%, 15% { transform: rotate(0deg); }
+            45%, 85% { transform: rotate(-90deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .rotate-phone-icon {
+            animation: phoneRotateAnim 3s ease-in-out infinite;
         }
 
         /* Tampilan Kertas Harta Karun Usang */
@@ -134,10 +170,9 @@
                 linear-gradient(rgba(101, 67, 33, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(101, 67, 33, 0.05) 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 20px 20px, 20px 20px;
-            box-shadow: inset 0 0 50px rgba(101, 67, 33, 0.7), 0 15px 30px rgba(0,0,0,0.8);
+            box-shadow: inset 0 0 40px rgba(101, 67, 33, 0.7), 0 12px 28px rgba(0,0,0,0.8);
             border: none;
             color: #3e2723;
-            /* Efek ujung sobek / gerigi dengan clip-path */
             clip-path: polygon(
                 1% 1%, 5% 0%, 10% 1%, 15% 0%, 20% 2%, 25% 0%, 30% 1%, 35% 0%, 40% 2%, 45% 0%, 50% 1%, 55% 0%, 60% 2%, 65% 0%, 70% 1%, 75% 0%, 80% 2%, 85% 0%, 90% 1%, 95% 0%, 99% 1%,
                 100% 5%, 98% 10%, 100% 15%, 99% 20%, 100% 25%, 98% 30%, 100% 35%, 99% 40%, 100% 45%, 98% 50%, 100% 55%, 99% 60%, 100% 65%, 98% 70%, 100% 75%, 99% 80%, 100% 85%, 98% 90%, 100% 95%, 99% 99%,
@@ -148,204 +183,255 @@
         .map-text { color: #3e2723; text-shadow: none; font-weight: 600; }
         .map-title { color: #5d4037; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
         .map-box { background: rgba(139, 90, 43, 0.15); border: 1px dashed rgba(101, 67, 33, 0.5); }
+
+        /* Penyesuaian Kompak Khusus Smartphone Landscape (Tinggi layar <= 500px) */
+        @media (max-height: 500px) {
+            .compact-hud-panel {
+                padding: 6px 10px !important;
+            }
+            .compact-title {
+                font-size: 11px !important;
+            }
+            .compact-text {
+                font-size: 9px !important;
+            }
+            .compact-btn {
+                padding: 5px 8px !important;
+                font-size: 9px !important;
+            }
+            .compact-modal {
+                padding: 12px 18px !important;
+                max-width: 88% !important;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Kanvas 3D Utama -->
-    <canvas id="game-canvas"></canvas>
+    <div id="viewport-wrapper">
+        <!-- Panggung Utama Rasio 16:9 -->
+        <div id="game-stage">
 
-    <!-- Lapisan Antarmuka (HUD) -->
-    <div class="hud-layer flex flex-col justify-between p-3 sm:p-5">
-        
-        <!-- Baris Atas: Kesehatan, Skor, Misi, Pengaturan Audio & Peta -->
-        <div class="flex justify-between items-start gap-2 w-full">
-            
-            <!-- Panel Status Kapal & Misi -->
-            <div class="wood-panel rounded-xl p-3 sm:p-4 max-w-xs sm:max-w-md interactive-ui">
-                <div class="flex items-center justify-between gap-4 mb-2">
-                    <h1 class="font-pirate text-sm sm:text-lg font-extrabold text-amber-300 tracking-wider">
-                        HARTA KARUN AL & REY
-                    </h1>
-                    <span id="score-badge" class="bg-amber-950/90 border border-amber-500/60 px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-bold text-amber-300">
-                        Skor: 0
-                    </span>
+            <!-- 0. LAYAR LOADING AWAL (INITIAL BOOTSTRAP & 16:9 CALIBRATION) -->
+            <div id="loading-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#041827] p-4 transition-opacity duration-500">
+                <div class="relative w-14 h-14 sm:w-20 sm:h-20 mb-3 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full border-4 border-amber-500/20"></div>
+                    <div class="w-full h-full rounded-full border-4 border-amber-400 border-t-transparent compass-spin"></div>
+                    <span class="text-xl sm:text-3xl">🧭</span>
                 </div>
-
-                <!-- Bar Kesehatan Kapal -->
-                <div class="mb-2.5">
-                    <div class="flex justify-between text-xs mb-1 font-semibold text-amber-100">
-                        <span>Kondisi Lambung Kapal</span>
-                        <span id="health-text">100%</span>
-                    </div>
-                    <div class="w-full h-3 bg-stone-900 rounded-full overflow-hidden border border-amber-700/60 p-0.5">
-                        <div id="health-bar" class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-300" style="width: 100%;"></div>
-                    </div>
+                <h2 class="font-pirate text-base sm:text-2xl font-black text-amber-300 tracking-widest text-center mb-1">
+                    HARTA KARUN AL & REY
+                </h2>
+                <p id="loading-status" class="text-[10px] sm:text-xs text-amber-100/80 mb-3 text-center">
+                    Menyiapkan Lautan 3D & Mengkalibrasi Layar 16:9...
+                </p>
+                <div class="w-48 sm:w-64 h-2.5 bg-stone-900 rounded-full overflow-hidden border border-amber-600/60 p-0.5">
+                    <div id="loading-progress" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 rounded-full transition-all duration-150" style="width: 10%;"></div>
                 </div>
+                <div id="portrait-tip" class="hidden mt-3 items-center gap-2 bg-amber-950/80 border border-amber-500/40 px-3 py-1.5 rounded-lg text-[10px] text-amber-200">
+                    <span class="inline-block rotate-phone-icon text-sm">📱</span>
+                    <span>Putar smartphone ke <b>Landscape (Mendatar)</b> untuk tampilan 16:9 maksimal</span>
+                </div>
+            </div>
 
-                <!-- Indikator Peti Harta Karun & Misi -->
-                <div class="flex items-center justify-between bg-black/35 rounded-lg px-3 py-2 border border-amber-500/20">
-                    <div>
-                        <div class="text-[11px] uppercase tracking-wider text-amber-300/80 font-bold">Misi Utama</div>
-                        <div id="mission-text" class="text-xs sm:text-sm text-amber-100 font-medium">
-                            Temukan 3 Peti Harta Karun di Pulau
+            <!-- Kanvas 3D Utama -->
+            <canvas id="game-canvas"></canvas>
+
+            <!-- Lapisan Antarmuka (HUD) di dalam 16:9 -->
+            <div class="hud-layer flex flex-col justify-between p-2 sm:p-4">
+                
+                <!-- Baris Atas: Kesehatan, Skor, Misi, Pengaturan Audio & Peta -->
+                <div class="flex justify-between items-start gap-2 w-full">
+                    
+                    <!-- Panel Status Kapal & Misi -->
+                    <div class="wood-panel compact-hud-panel rounded-xl p-2 sm:p-3.5 max-w-[230px] sm:max-w-sm interactive-ui">
+                        <div class="flex items-center justify-between gap-2 mb-1 sm:mb-2">
+                            <h1 class="font-pirate compact-title text-xs sm:text-base font-extrabold text-amber-300 tracking-wider truncate">
+                                HARTA KARUN AL & REY
+                            </h1>
+                            <span id="score-badge" class="compact-text bg-amber-950/90 border border-amber-500/60 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-amber-300 whitespace-nowrap">
+                                Skor: 0
+                            </span>
+                        </div>
+
+                        <!-- Bar Kesehatan Kapal -->
+                        <div class="mb-1.5 sm:mb-2">
+                            <div class="flex justify-between compact-text text-[10px] sm:text-xs mb-0.5 font-semibold text-amber-100">
+                                <span>Kondisi Lambung</span>
+                                <span id="health-text">100%</span>
+                            </div>
+                            <div class="w-full h-2 sm:h-2.5 bg-stone-900 rounded-full overflow-hidden border border-amber-700/60 p-0.5">
+                                <div id="health-bar" class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all duration-300" style="width: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Indikator Peti Harta Karun & Misi -->
+                        <div class="flex items-center justify-between bg-black/35 rounded-lg px-2 py-1 sm:px-2.5 sm:py-1.5 border border-amber-500/20">
+                            <div class="pr-1">
+                                <div class="text-[8px] sm:text-[10px] uppercase tracking-wider text-amber-300/80 font-bold leading-tight">Misi Utama</div>
+                                <div id="mission-text" class="compact-text text-[10px] sm:text-xs text-amber-100 font-medium leading-tight">
+                                    Temukan 3 Peti Harta Karun
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 ml-1 shrink-0" id="treasure-icons">
+                                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded bg-stone-800 border border-amber-600/50 flex items-center justify-center text-[10px] sm:text-xs opacity-40" id="chest-icon-0">👑</div>
+                                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded bg-stone-800 border border-amber-600/50 flex items-center justify-center text-[10px] sm:text-xs opacity-40" id="chest-icon-1">👑</div>
+                                <div class="w-5 h-5 sm:w-6 sm:h-6 rounded bg-stone-800 border border-amber-600/50 flex items-center justify-center text-[10px] sm:text-xs opacity-40" id="chest-icon-2">👑</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1.5 ml-3" id="treasure-icons">
-                        <!-- Ikon peti harta karun -->
-                        <div class="w-7 h-7 rounded bg-stone-800 border border-amber-600/50 flex items-center justify-center text-sm opacity-40" id="chest-icon-0">👑</div>
-                        <div class="w-7 h-7 rounded bg-stone-800 border border-amber-600/50 flex items-center justify-center text-sm opacity-40" id="chest-icon-1">👑</div>
-                        <div class="w-7 h-7 rounded bg-stone-800 border border-amber-600/50 flex items-center justify-center text-sm opacity-40" id="chest-icon-2">👑</div>
+
+                    <!-- Kanan Atas: Minimap & Pengaturan Suara / Layar Penuh -->
+                    <div class="flex flex-col items-end gap-1.5 interactive-ui">
+                        <div class="flex items-center gap-1.5">
+                            <!-- Panel Kontrol Audio & Fullscreen 16:9 -->
+                            <div class="wood-panel rounded-xl px-2 py-1 sm:px-2.5 sm:py-1.5 flex items-center gap-1.5">
+                                <button id="btn-mute" title="Matikan / Nyalakan Suara" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-900/70 hover:bg-amber-800 border border-amber-500/50 flex items-center justify-center text-amber-200 transition">
+                                    <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z" />
+                                    </svg>
+                                    <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 hidden text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                                    </svg>
+                                </button>
+                                <input id="volume-slider" type="range" min="0" max="100" value="75" class="w-12 sm:w-20 accent-amber-400 cursor-pointer h-1.5 bg-stone-800 rounded-lg" title="Volume Suara">
+                                <button id="btn-reset-cam" title="Reset Sudut Kamera" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-900/70 hover:bg-amber-800 border border-amber-500/50 flex items-center justify-center text-amber-200 text-[10px] sm:text-xs font-bold transition">
+                                    🎥
+                                </button>
+                                <button id="btn-fullscreen" title="Layar Penuh 16:9" class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-amber-900/70 hover:bg-amber-800 border border-amber-500/50 flex items-center justify-center text-amber-200 text-[10px] sm:text-xs font-bold transition">
+                                    ⛶
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Radar Peta Kecil (Minimap) -->
+                        <div class="relative flex flex-col items-end">
+                            <div id="minimap-container">
+                                <canvas id="minimap-canvas" width="160" height="160" class="w-full h-full"></canvas>
+                                <div class="absolute top-0.5 left-1/2 -translate-x-1/2 text-[8px] sm:text-[10px] font-pirate font-bold text-amber-300 drop-shadow">U</div>
+                            </div>
+                            <div class="mt-0.5 text-center text-[8px] sm:text-[10px] text-amber-200/90 bg-black/60 rounded px-1.5 py-0.5 border border-amber-500/30 whitespace-nowrap">
+                                🟡 Harta &nbsp; 🔴 Musuh &nbsp; 🟢 Kapal
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Kanan Atas: Minimap & Pengaturan Suara -->
-            <div class="flex flex-col items-end gap-2 interactive-ui">
-                <div class="flex items-center gap-2">
-                    <!-- Panel Kontrol Audio -->
-                    <div class="wood-panel rounded-xl px-3 py-2 flex items-center gap-2">
-                        <button id="btn-mute" title="Matikan / Nyalakan Suara" class="w-8 h-8 rounded-lg bg-amber-900/70 hover:bg-amber-800 border border-amber-500/50 flex items-center justify-center text-amber-200 transition">
-                            <svg id="icon-sound-on" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z" />
-                            </svg>
-                            <svg id="icon-sound-off" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 hidden text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
-                            </svg>
-                        </button>
-                        <input id="volume-slider" type="range" min="0" max="100" value="75" class="w-16 sm:w-24 accent-amber-400 cursor-pointer h-1.5 bg-stone-800 rounded-lg" title="Volume Suara">
-                        <button id="btn-reset-cam" title="Reset Sudut Kamera" class="w-8 h-8 rounded-lg bg-amber-900/70 hover:bg-amber-800 border border-amber-500/50 flex items-center justify-center text-amber-200 text-xs font-bold transition">
-                            🎥
-                        </button>
+                <!-- Pesan Notifikasi Tengah -->
+                <div id="toast-message" class="self-center pointer-events-none transition-all duration-500 opacity-0 transform -translate-y-4">
+                    <div class="wood-panel px-4 py-1.5 sm:px-6 sm:py-2.5 rounded-full text-center border-2 border-amber-300 shadow-2xl">
+                        <span id="toast-text" class="font-pirate font-bold text-[10px] sm:text-sm text-amber-200 tracking-wide"></span>
                     </div>
                 </div>
 
-                <!-- Radar Peta Kecil (Minimap) -->
-                <div class="relative">
-                    <div id="minimap-container">
-                        <canvas id="minimap-canvas" width="160" height="160" class="w-full h-full"></canvas>
-                        <div class="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-pirate font-bold text-amber-300 drop-shadow">U</div>
+                <!-- Baris Bawah: Kontrol Joystick Virtual & Tombol Meriam -->
+                <div class="flex justify-between items-end w-full">
+                    
+                    <!-- Joystick Kiri -->
+                    <div class="flex flex-col items-center gap-1 interactive-ui">
+                        <div id="joystick-zone">
+                            <span class="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] sm:text-[10px] text-amber-300/60 font-bold">MAJU</span>
+                            <span class="absolute bottom-1 left-1/2 -translate-x-1/2 text-[8px] sm:text-[10px] text-amber-300/60 font-bold">MUNDUR</span>
+                            <div id="joystick-knob"></div>
+                        </div>
+                        <span class="text-[9px] sm:text-[11px] text-amber-100/80 bg-black/45 px-2 py-0.5 rounded-full border border-amber-500/20">
+                            Kemudi / WASD
+                        </span>
                     </div>
-                    <div class="mt-1 text-center text-[10px] text-amber-200/90 bg-black/60 rounded px-2 py-0.5 border border-amber-500/30">
-                        🟡 Harta &nbsp; 🔴 Musuh &nbsp; 🟢 Kapalmu
+
+                    <!-- Petunjuk Geser Kamera di Tengah Bawah (Desktop/Tablet) -->
+                    <div class="hidden lg:flex flex-col items-center text-[11px] text-amber-100/75 bg-black/40 px-3.5 py-1.5 rounded-xl border border-amber-500/20">
+                        <span>Geser layar untuk memutar kamera sinematik</span>
+                        <span class="text-[10px] text-amber-300/80">Dekati cahaya emas di pantai pulau untuk mengambil Harta Karun</span>
                     </div>
+
+                    <!-- Tombol Tembak Meriam & Kecepatan Kanan -->
+                    <div class="flex flex-col items-end gap-1.5 interactive-ui">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <button id="btn-fire-left" class="gold-button compact-btn rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 flex flex-col items-center justify-center">
+                                <span class="text-sm sm:text-base leading-none">💣</span>
+                                <span class="text-[8px] sm:text-[10px] font-bold mt-0.5">KIRI (Q)</span>
+                            </button>
+                            <button id="btn-fire-right" class="gold-button compact-btn rounded-xl px-2.5 py-2 sm:px-3.5 sm:py-2.5 flex flex-col items-center justify-center">
+                                <span class="text-sm sm:text-base leading-none">💣</span>
+                                <span class="text-[8px] sm:text-[10px] font-bold mt-0.5">KANAN (E)</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-1.5 w-full">
+                            <button id="btn-pirate-shout" class="gold-button compact-btn rounded-xl py-1.5 px-2.5 sm:py-2 sm:px-3 font-pirate font-bold text-[9px] sm:text-xs tracking-wider" title="Teriakan Bajak Laut (R)">
+                                🏴‍☠️ YARRR!
+                            </button>
+                            <button id="btn-fire-both" class="gold-button compact-btn flex-1 rounded-xl py-1.5 px-2.5 sm:py-2 sm:px-3 font-pirate font-bold text-[9px] sm:text-xs tracking-wider whitespace-nowrap">
+                                🔥 TEMBAK (SPASI)
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-        </div>
 
-        <!-- Pesan Notifikasi Tengah -->
-        <div id="toast-message" class="self-center pointer-events-none transition-all duration-500 opacity-0 transform -translate-y-4">
-            <div class="wood-panel px-6 py-3 rounded-full text-center border-2 border-amber-300 shadow-2xl">
-                <span id="toast-text" class="font-pirate font-bold text-sm sm:text-base text-amber-200 tracking-wide"></span>
-            </div>
-        </div>
+            <!-- Layar Pembuka (Start Modal - Disesuaikan Presisi 16:9 Mobile) -->
+            <div id="start-overlay" class="absolute inset-0 z-30 flex items-center justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-4">
+                <div class="treasure-map compact-modal max-w-lg w-full max-h-[94%] overflow-y-auto p-4 sm:p-7 text-center relative flex flex-col justify-center">
+                    <div class="inline-block self-center border border-[#8b5a2b] rounded-full px-3 py-0.5 text-[9px] sm:text-xs font-bold text-[#5d4037] mb-1.5 bg-[#e6d5a8]/50">
+                        PETUALANGAN LAUTAN TROPIKA 3D • 16:9
+                    </div>
+                    <h1 class="font-pirate text-xl sm:text-3xl font-black map-title mb-1.5 tracking-wider leading-tight">
+                        HARTA KARUN AL & REY
+                    </h1>
+                    <p class="map-text text-[10px] sm:text-xs leading-relaxed mb-3">
+                        Berlayarlah bersama Kapten <strong>Al</strong> dan <strong>Rey</strong> melintasi perairan zamrud tropis! Kemudikan kapal bajak lautmu, hindari batu karang, kalahkan perompak musuh, dan temukan <strong>3 Peti Harta Karun Legendaris</strong>.
+                    </p>
 
-        <!-- Baris Bawah: Kontrol Joystick Virtual & Tombol Meriam -->
-        <div class="flex justify-between items-end w-full pb-1 sm:pb-2">
-            
-            <!-- Joystick Kiri -->
-            <div class="flex flex-col items-center gap-1.5 interactive-ui">
-                <div id="joystick-zone">
-                    <!-- Penanda arah kompas di dalam joystick -->
-                    <span class="absolute top-1.5 left-1/2 -translate-x-1/2 text-[10px] text-amber-300/60 font-bold">MAJU</span>
-                    <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[10px] text-amber-300/60 font-bold">MUNDUR</span>
-                    <div id="joystick-knob"></div>
-                </div>
-                <span class="text-[11px] text-amber-100/80 bg-black/45 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                    Kemudi / WASD
-                </span>
-            </div>
+                    <div class="grid grid-cols-3 gap-1.5 sm:gap-2.5 text-left mb-3.5 text-[9px] sm:text-xs">
+                        <div class="map-box p-1.5 sm:p-2.5 rounded-lg">
+                            <div class="font-black text-[#4e342e] mb-0.5">⛵ Kemudi</div>
+                            <div class="text-[#3e2723] leading-tight">Joystick di kiri bawah atau <b>WASD / Panah</b>.</div>
+                        </div>
+                        <div class="map-box p-1.5 sm:p-2.5 rounded-lg">
+                            <div class="font-black text-[#4e342e] mb-0.5">💣 Meriam</div>
+                            <div class="text-[#3e2723] leading-tight">Tembak meriam dengan tombol layar / <b>Spasi</b>.</div>
+                        </div>
+                        <div class="map-box p-1.5 sm:p-2.5 rounded-lg">
+                            <div class="font-black text-[#4e342e] mb-0.5">👑 3 Harta</div>
+                            <div class="text-[#3e2723] leading-tight">Ikuti titik emas di Radar & pilar cahaya pulau.</div>
+                        </div>
+                    </div>
 
-            <!-- Petunjuk Geser Kamera di Tengah Bawah (Desktop) -->
-            <div class="hidden md:flex flex-col items-center text-xs text-amber-100/75 bg-black/40 px-4 py-2 rounded-xl border border-amber-500/20">
-                <span>Geser layar dengan Mouse untuk memutar kamera sinematik</span>
-                <span class="text-[11px] text-amber-300/80">Dekati cahaya emas di pantai pulau untuk mengambil Harta Karun</span>
-            </div>
-
-            <!-- Tombol Tembak Meriam & Kecepatan Kanan -->
-            <div class="flex flex-col items-end gap-2 interactive-ui">
-                <div class="flex items-center gap-2.5">
-                    <button id="btn-fire-left" class="gold-button rounded-2xl px-3.5 py-3 sm:px-4 sm:py-3.5 flex flex-col items-center justify-center">
-                        <span class="text-base sm:text-lg leading-none">💣</span>
-                        <span class="text-[10px] sm:text-xs font-bold mt-1">MERIAM KIRI (Q)</span>
+                    <button id="btn-start-game" class="gold-button w-full py-2.5 sm:py-3 rounded-xl font-pirate font-extrabold text-xs sm:text-base tracking-widest cursor-pointer shadow-xl">
+                        ANGKAT JANGKAR & BERLAYAR!
                     </button>
-                    <button id="btn-fire-right" class="gold-button rounded-2xl px-3.5 py-3 sm:px-4 sm:py-3.5 flex flex-col items-center justify-center">
-                        <span class="text-base sm:text-lg leading-none">💣</span>
-                        <span class="text-[10px] sm:text-xs font-bold mt-1">MERIAM KANAN (E)</span>
+                </div>
+            </div>
+
+            <!-- Layar Kemenangan / Kekalahan (End Modal - Disesuaikan 16:9) -->
+            <div id="end-overlay" class="absolute inset-0 z-30 hidden items-center justify-center bg-black/80 backdrop-blur-md p-2 sm:p-4">
+                <div class="wood-panel compact-modal rounded-2xl max-w-md w-full max-h-[94%] p-4 sm:p-6 text-center border-2 border-amber-400 shadow-2xl flex flex-col justify-center">
+                    <div id="end-icon" class="text-3xl sm:text-5xl mb-1.5">🏆</div>
+                    <h2 id="end-title" class="font-pirate text-lg sm:text-2xl font-black text-amber-300 title-glow mb-1">
+                        KEMENANGAN GEMILANG!
+                    </h2>
+                    <p id="end-desc" class="text-amber-100/90 text-[10px] sm:text-xs leading-relaxed mb-3">
+                        Selamat! Al & Rey berhasil mengumpulkan seluruh peti harta karun legendaris dan menguasai lautan tropis!
+                    </p>
+                    <div class="bg-black/45 rounded-xl p-2.5 sm:p-3.5 mb-4 border border-amber-500/30 flex justify-around">
+                        <div>
+                            <div class="text-[10px] text-amber-300/80">Harta Terkumpul</div>
+                            <div id="end-treasures" class="font-pirate text-base sm:text-xl font-bold text-amber-300">3 / 3</div>
+                        </div>
+                        <div class="border-r border-amber-500/30"></div>
+                        <div>
+                            <div class="text-[10px] text-amber-300/80">Skor Akhir</div>
+                            <div id="end-score" class="font-pirate text-base sm:text-xl font-bold text-amber-300">0</div>
+                        </div>
+                    </div>
+                    <button id="btn-restart-game" class="gold-button w-full py-2.5 sm:py-3 rounded-xl font-pirate font-extrabold text-xs sm:text-base tracking-widest cursor-pointer">
+                        BERLAYAR KEMBALI
                     </button>
                 </div>
-                <div class="flex items-center gap-2 w-full">
-                    <button id="btn-pirate-shout" class="gold-button rounded-xl py-2.5 px-3 font-pirate font-bold text-xs sm:text-sm tracking-wider" title="Teriakan Bajak Laut (R)">
-                        🏴‍☠️ YARRR! (R)
-                    </button>
-                    <button id="btn-fire-both" class="gold-button flex-1 rounded-xl py-2.5 px-3 font-pirate font-bold text-xs sm:text-sm tracking-wider">
-                        🔥 TEMBAK SEMUA (SPASI)
-                    </button>
-                </div>
             </div>
 
-        </div>
-    </div>
-
-    <!-- Layar Pembuka (Start Modal) -->
-    <div id="start-overlay" class="fixed inset-0 z-30 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
-        <div class="treasure-map max-w-lg w-full p-8 sm:p-10 text-center relative">
-            <div class="inline-block border border-[#8b5a2b] rounded-full px-4 py-1 text-xs font-bold text-[#5d4037] mb-3 bg-[#e6d5a8]/50">
-                PETUALANGAN LAUTAN TROPIKA 3D
-            </div>
-            <h1 class="font-pirate text-3xl sm:text-4xl font-black map-title mb-2 tracking-wider">
-                HARTA KARUN<br>AL & REY
-            </h1>
-            <p class="map-text text-xs sm:text-sm leading-relaxed mb-5">
-                Berlayarlah bersama Kapten <strong>Al</strong> dan <strong>Rey</strong> melintasi perairan zamrud tropis! Kemudikan kapal bajak lautmu, hindari batu karang tajam, kalahkan kapal perompak musuh, dan temukan <strong>3 Peti Harta Karun Legendaris</strong> yang tersembunyi di tiga pulau eksotis.
-            </p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left mb-6 text-xs">
-                <div class="map-box p-3 rounded-lg">
-                    <div class="font-black text-[#4e342e] mb-1">⛵ Kemudi Kapal</div>
-                    <div class="text-[#3e2723]">Gunakan Joystick Virtual di kiri bawah atau tombol <b>W, A, S, D / Panah</b>.</div>
-                </div>
-                <div class="map-box p-3 rounded-lg">
-                    <div class="font-black text-[#4e342e] mb-1">💣 Pertempuran</div>
-                    <div class="text-[#3e2723]">Tembakkan meriam lambung dengan tombol layar atau <b>Spasi / Q / E</b>.</div>
-                </div>
-                <div class="map-box p-3 rounded-lg">
-                    <div class="font-black text-[#4e342e] mb-1">👑 3 Harta Karun</div>
-                    <div class="text-[#3e2723]">Ikuti titik emas di Radar Peta & dekati pilar cahaya emas di pulau.</div>
-                </div>
-            </div>
-
-            <button id="btn-start-game" class="gold-button w-full py-3.5 rounded-xl font-pirate font-extrabold text-base sm:text-lg tracking-widest cursor-pointer shadow-xl">
-                ANGKAT JANGKAR & BERLAYAR!
-            </button>
-        </div>
-    </div>
-
-    <!-- Layar Kemenangan / Kekalahan (End Modal) -->
-    <div id="end-overlay" class="fixed inset-0 z-30 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="wood-panel rounded-3xl max-w-md w-full p-6 sm:p-8 text-center border-2 border-amber-400 shadow-2xl">
-            <div id="end-icon" class="text-5xl mb-3">🏆</div>
-            <h2 id="end-title" class="font-pirate text-2xl sm:text-3xl font-black text-amber-300 title-glow mb-2">
-                KEMENANGAN GEMILANG!
-            </h2>
-            <p id="end-desc" class="text-amber-100/90 text-sm leading-relaxed mb-5">
-                Selamat! Al & Rey berhasil mengumpulkan seluruh peti harta karun legendaris dan menguasai lautan tropis!
-            </p>
-            <div class="bg-black/45 rounded-2xl p-4 mb-6 border border-amber-500/30 flex justify-around">
-                <div>
-                    <div class="text-xs text-amber-300/80">Harta Terkumpul</div>
-                    <div id="end-treasures" class="font-pirate text-xl font-bold text-amber-300">3 / 3</div>
-                </div>
-                <div class="border-r border-amber-500/30"></div>
-                <div>
-                    <div class="text-xs text-amber-300/80">Skor Akhir</div>
-                    <div id="end-score" class="font-pirate text-xl font-bold text-amber-300">0</div>
-                </div>
-            </div>
-            <button id="btn-restart-game" class="gold-button w-full py-3.5 rounded-2xl font-pirate font-extrabold text-base tracking-widest cursor-pointer">
-                BERLAYAR KEMBALI
-            </button>
         </div>
     </div>
 
@@ -366,7 +452,7 @@
                 this.isPlaying = false;
                 this.melodyStep = 0;
                 this.melodyTimer = null;
-                this.voiceCache = {}; // Cache untuk menyimpan hasil suara AI
+                this.voiceCache = {};
             }
 
             init() {
@@ -409,7 +495,6 @@
                 return this.isMuted;
             }
 
-            // Suara deburan ombak & hembusan angin laut berkelanjutan
             startOceanAmbience() {
                 if (!this.ctx) return;
                 const bufferSize = this.ctx.sampleRate * 4;
@@ -431,16 +516,15 @@
                 filter.type = 'lowpass';
                 filter.frequency.value = 320;
 
-                // Modulasi gelombang ombak naik-turun
                 const lfo = this.ctx.createOscillator();
-                lfo.frequency.value = 0.16; // siklus ombak ~6 detik
+                lfo.frequency.value = 0.16;
                 const lfoGain = this.ctx.createGain();
                 lfoGain.gain.value = 180;
                 lfo.connect(filter.frequency);
                 lfo.start();
 
                 const waveGain = this.ctx.createGain();
-                waveGain.gain.value = 0.18;
+                waveGain.value = 0.18;
 
                 whiteNoise.connect(filter);
                 filter.connect(waveGain);
@@ -448,16 +532,13 @@
                 whiteNoise.start();
             }
 
-            // Musik latar petualangan bajak laut (Sea Shanty / Adventure Theme dalam D Dorian)
             startPirateMusicLoop() {
-                // Frekuensi nada D Dorian / A Minor untuk nuansa petualangan bajak laut
                 const N = {
                     D3: 146.83, F3: 174.61, G3: 196.00, A3: 220.00, C4: 261.63,
                     D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00,
                     B4: 493.88, C5: 523.25, D5: 587.33, REST: 0
                 };
 
-                // Melodi petualangan bajak laut 32 ketukan
                 const melody = [
                     N.D4, N.A4, N.A4, N.G4, N.A4, N.B4, N.A4, N.G4,
                     N.F4, N.E4, N.D4, N.E4, N.F4, N.G4, N.A4, N.REST,
@@ -472,7 +553,7 @@
                     N.G3, N.F3, N.A3, N.A3, N.D3, N.A3, N.D3, N.REST
                 ];
 
-                const stepDuration = 230; // ms per ketukan (ritme cepat gembira)
+                const stepDuration = 230;
 
                 if (this.melodyTimer) clearInterval(this.melodyTimer);
                 this.melodyTimer = setInterval(() => {
@@ -480,7 +561,6 @@
                     const now = this.ctx.currentTime;
                     const idx = this.melodyStep % melody.length;
 
-                    // Mainkan nada melodi (suara akordeon/biola hangat)
                     const freq = melody[idx];
                     if (freq > 0) {
                         const osc = this.ctx.createOscillator();
@@ -490,7 +570,7 @@
                         osc.type = 'sawtooth';
                         osc2.type = 'triangle';
                         osc.frequency.setValueAtTime(freq, now);
-                        osc2.frequency.setValueAtTime(freq * 1.003, now); // sedikit detune agar kaya
+                        osc2.frequency.setValueAtTime(freq * 1.003, now);
 
                         const lp = this.ctx.createBiquadFilter();
                         lp.type = 'lowpass';
@@ -511,7 +591,6 @@
                         osc2.stop(now + 0.22);
                     }
 
-                    // Mainkan bass ritmis setiap ketukan genap
                     const bassFreq = bass[idx];
                     if (bassFreq > 0 && idx % 2 === 0) {
                         const bOsc = this.ctx.createOscillator();
@@ -533,12 +612,10 @@
                 }, stepDuration);
             }
 
-            // Suara dentuman meriam
             playCannonSound() {
                 if (!this.ctx) return;
                 const now = this.ctx.currentTime;
 
-                // Dentuman sub-bass
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
@@ -553,7 +630,6 @@
                 osc.start(now);
                 osc.stop(now + 0.52);
 
-                // Ledakan noise mesiu
                 const bufSize = this.ctx.sampleRate * 0.4;
                 const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
                 const data = buf.getChannelData(0);
@@ -577,7 +653,6 @@
                 noise.start(now);
             }
 
-            // Suara tabrakan atau ledakan kena meriam
             playExplosionSound() {
                 if (!this.ctx) return;
                 const now = this.ctx.currentTime;
@@ -596,10 +671,9 @@
                 osc.stop(now + 0.66);
             }
 
-            // Suara kilau emas saat menemukan peti harta karun
             playTreasureChime() {
                 if (!this.ctx) return;
-                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // Akor C Mayor Arpeggio
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
                 notes.forEach((freq, i) => {
                     const now = this.ctx.currentTime + i * 0.09;
                     const osc = this.ctx.createOscillator();
@@ -618,7 +692,6 @@
                 });
             }
 
-            // Suara Teriakan Khas Bajak Laut Realistis menggunakan AI TTS
             playPirateShout(type = 'random') {
                 if (this.isMuted) return;
                 if (!this.ctx) this.init();
@@ -630,7 +703,7 @@
                     ],
                     attack: [
                         "Tembak meriam!",
-                        "Hancurkan lambung mereka!"
+                        "Hancurkan kapal mereka!"
                     ],
                     treasure: [
                         "Yo ho ho! Harta karun ditemukan!",
@@ -649,7 +722,6 @@
                 const list = shoutsByCategory[type] || shoutsByCategory.random;
                 const phrase = list[Math.floor(Math.random() * list.length)];
 
-                // Menggunakan AI TTS untuk menghasilkan suara manusia sungguhan
                 this.speakWithAI(phrase);
                 return phrase;
             }
@@ -683,7 +755,6 @@
                             const match = mimeType.match(/rate=(\d+)/);
                             const sampleRate = match ? parseInt(match[1], 10) : 24000;
                             
-                            // Dekode Base64 PCM16 ke Float32 AudioBuffer
                             const binaryString = window.atob(part.inlineData.data);
                             const bytes = new Uint8Array(binaryString.length);
                             for (let i = 0; i < binaryString.length; i++) {
@@ -696,12 +767,11 @@
                             for (let i = 0; i < pcm16.length; i++) {
                                 channelData[i] = pcm16[i] / 32768.0;
                             }
-                            this.voiceCache[phrase] = audioBuffer; // Simpan di cache
+                            this.voiceCache[phrase] = audioBuffer;
                         } else {
                             throw new Error("Data audio kosong");
                         }
                     } catch (e) {
-                        console.error("AI Voice gagal, memakai suara darurat:", e);
                         if ('speechSynthesis' in window) {
                             const utterance = new SpeechSynthesisUtterance(phrase);
                             utterance.lang = 'id-ID';
@@ -714,12 +784,11 @@
                     }
                 }
                 
-                // Putar suara yang dihasilkan dari buffer
                 if (audioBuffer && !this.isMuted) {
                     const source = this.ctx.createBufferSource();
                     source.buffer = audioBuffer;
                     const gain = this.ctx.createGain();
-                    gain.gain.value = 1.8; // Volume khusus teriakan diperkuat
+                    gain.gain.value = 1.8;
                     source.connect(gain);
                     gain.connect(this.masterGain);
                     source.start();
@@ -729,7 +798,9 @@
 
         const audioSys = new PirateAudioSystem();
 
-        // Generator Tekstur Kayu
+        /********************************************************************
+         * 2. GENERATOR TEKSTUR PROSEDURAL
+         ********************************************************************/
         function createWoodTexture() {
             const c = document.createElement('canvas');
             c.width = 256;
@@ -744,7 +815,6 @@
             return new THREE.CanvasTexture(c);
         }
 
-        // Generator Tekstur Layar Kain Kasar dengan Emblem
         function createSailTexture(isEnemy = false) {
             const c = document.createElement('canvas');
             c.width = 256;
@@ -760,16 +830,14 @@
                 ctx.fillRect(0, Math.random() * 256, 256, 1);
             }
 
-            // Emblem Kompas / Lambang Kapal
             ctx.save();
             ctx.translate(128, 128);
             if (!isEnemy) {
-                // Lambang Kompas Emas Al & Rey
                 ctx.fillStyle = '#b45309';
                 ctx.beginPath();
                 for (let i = 0; i < 8; i++) {
                     const angle = (i * Math.PI) / 4;
-                    const rOut = i % 2 === 0 ? 56 : 32; // Sedikit dikecilkan agar teks muat
+                    const rOut = i % 2 === 0 ? 56 : 32;
                     ctx.lineTo(Math.cos(angle) * rOut, Math.sin(angle) * rOut);
                     const nextAngle = angle + Math.PI / 8;
                     ctx.lineTo(Math.cos(nextAngle) * 16, Math.sin(nextAngle) * 16);
@@ -777,20 +845,16 @@
                 ctx.closePath();
                 ctx.fill();
 
-                // Tulisan AL & REY Gaya Realistis Tinta Cokelat
                 ctx.fillStyle = '#291402'; 
                 ctx.font = '900 36px "Cinzel", serif';
                 ctx.textAlign = 'center';
-                // Tambahkan bayangan (drop shadow) untuk kesan tinta tebal realistis
                 ctx.shadowColor = 'rgba(0,0,0,0.55)';
                 ctx.shadowBlur = 4;
                 ctx.shadowOffsetX = 1;
                 ctx.shadowOffsetY = 2;
                 ctx.fillText('AL & REY', 0, 110);
-                // Reset shadow
                 ctx.shadowColor = 'transparent';
             } else {
-                // Lambang Pedang Silang Merah Perompak Musuh
                 ctx.strokeStyle = '#dc2626';
                 ctx.lineWidth = 14;
                 ctx.beginPath();
@@ -821,18 +885,15 @@
             return tex;
         }
 
-        // Generator Tekstur Riak Air & Jaring Cahaya Bawah Air (Water Ripples & Sun Caustics)
         function createWaterRippleTexture() {
             const c = document.createElement('canvas');
             c.width = 512;
             c.height = 512;
             const ctx = c.getContext('2d');
 
-            // Dasar gradien air gelombang
             ctx.fillStyle = '#808080';
             ctx.fillRect(0, 0, 512, 512);
 
-            // Gambar ratusan gelombang riak sinus halus yang saling bersilangan
             for (let y = 0; y < 512; y += 4) {
                 for (let x = 0; x < 512; x += 4) {
                     const v1 = Math.sin(x * 0.049 + Math.cos(y * 0.049) * 2.5);
@@ -851,7 +912,6 @@
             return tex;
         }
 
-        // Generator Tekstur Caustics (Kilau Jaring Cahaya Matahari di Dasar Laut Jernih)
         function createCausticsTexture() {
             const c = document.createElement('canvas');
             c.width = 512;
@@ -861,7 +921,6 @@
             ctx.fillStyle = '#0d8a82';
             ctx.fillRect(0, 0, 512, 512);
 
-            // Pola sel jaring cahaya caustics tropis
             ctx.strokeStyle = 'rgba(167, 243, 208, 0.45)';
             ctx.lineWidth = 3;
             for (let i = 0; i < 90; i++) {
@@ -894,7 +953,6 @@
         const waterRippleTex = createWaterRippleTexture();
         const causticsTex = createCausticsTexture();
 
-        // Generator Tekstur Batu Karang Berpori (Bump Map)
         function createRockBumpTexture() {
             const c = document.createElement('canvas');
             c.width = 256;
@@ -912,7 +970,6 @@
             return tex;
         }
 
-        // Generator Tekstur Kulit Ikan (Gradien Gelap ke Terang / Countershading)
         function createFishSkinTexture(topColor, bottomColor) {
             const c = document.createElement('canvas');
             c.width = 128;
@@ -929,33 +986,27 @@
         }
 
         const rockBumpTex = createRockBumpTexture();
-        const sharkTex = createFishSkinTexture('#334155', '#f8fafc'); // Abu gelap ke putih pucat
-        const dolphinTex = createFishSkinTexture('#475569', '#f1f5f9'); // Biru keabu-abuan ke putih
+        const sharkTex = createFishSkinTexture('#334155', '#f8fafc');
+        const dolphinTex = createFishSkinTexture('#475569', '#f1f5f9');
 
-        // Generator Papan Nama Kapal (Buritan)
         function createNameplateTexture() {
             const c = document.createElement('canvas');
-            // Resolusi kanvas diperbesar 2x lipat agar teks sangat tajam
             c.width = 1024;
             c.height = 256;
             const ctx = c.getContext('2d');
 
-            // Latar belakang papan kayu gelap (lebih kontras)
             ctx.fillStyle = '#1a0d04';
             ctx.fillRect(0, 0, 1024, 256);
 
-            // Bingkai ukiran emas yang lebih tebal
             ctx.strokeStyle = '#f59e0b';
             ctx.lineWidth = 12;
             ctx.strokeRect(6, 6, 1012, 244);
 
-            // Tulisan AL & REY bergaya emas realistis yang jauh lebih besar
             ctx.fillStyle = '#fde047';
             ctx.font = '900 130px "Cinzel", serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
-            // Efek bayangan (drop shadow) ganda agar teks sangat menonjol
             ctx.shadowColor = 'rgba(0,0,0,1.0)';
             ctx.shadowBlur = 12;
             ctx.shadowOffsetX = 4;
@@ -963,7 +1014,6 @@
             
             ctx.fillText('AL & REY', 512, 128);
 
-            // Tambahkan garis tepi (stroke) tipis cokelat pada teks agar semakin mudah dibaca
             ctx.lineWidth = 3;
             ctx.strokeStyle = '#b45309';
             ctx.strokeText('AL & REY', 512, 128);
@@ -973,21 +1023,45 @@
         const nameplateTex = createNameplateTexture();
 
         /********************************************************************
-         * 3. INISIALISASI DUNIA 3D THREE.JS, PENCAHAYAAN & LANGIT
+         * 3. INISIALISASI DUNIA 3D THREE.JS (TERKUNCI PADA KONTAINER 16:9)
          ********************************************************************/
+        const gameStage = document.getElementById('game-stage');
         const canvas = document.getElementById('game-canvas');
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-        renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.25; // Diperbesar agar warna lebih tajam dan terang
+        renderer.toneMappingExposure = 1.25;
 
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x7dd3fc, 0.00065); // Warna fog disesuaikan lebih cerah biru tropis
+        scene.fog = new THREE.FogExp2(0x7dd3fc, 0.00065);
 
-        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.5, 2200);
+        // Kamera selalu menggunakan rasio aspek 16:9 (1.7777)
+        const camera = new THREE.PerspectiveCamera(55, 16 / 9, 0.5, 2200);
+
+        // Fungsi Kalibrasi Ukuran Kanvas 16:9 pada Smartphone & Desktop
+        function sync16by9Viewport() {
+            const rect = gameStage.getBoundingClientRect();
+            const width = Math.max(1, Math.floor(rect.width));
+            const height = Math.max(1, Math.floor(rect.height));
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height, false);
+
+            // Tampilkan petunjuk putar layar jika smartphone dalam posisi Portrait
+            const portraitTip = document.getElementById('portrait-tip');
+            if (portraitTip) {
+                if (window.innerHeight > window.innerWidth) {
+                    portraitTip.classList.remove('hidden');
+                    portraitTip.classList.add('flex');
+                } else {
+                    portraitTip.classList.add('hidden');
+                    portraitTip.classList.remove('flex');
+                }
+            }
+        }
 
         // Kubah Langit Tropis Cerah (Sky Dome)
         function createTropicalSky() {
@@ -997,9 +1071,9 @@
             skyCanvas.height = 512;
             const sCtx = skyCanvas.getContext('2d');
             const grad = sCtx.createLinearGradient(0, 0, 0, 512);
-            grad.addColorStop(0.0, '#0265ad');   // Biru angkasa atas lebih pekat tajam
-            grad.addColorStop(0.38, '#0ea5e9');  // Biru cerah
-            grad.addColorStop(0.60, '#38bdf8');  // Cakrawala tropis hangat
+            grad.addColorStop(0.0, '#0265ad');
+            grad.addColorStop(0.38, '#0ea5e9');
+            grad.addColorStop(0.60, '#38bdf8');
             grad.addColorStop(1.0, '#bce6ff');
             sCtx.fillStyle = grad;
             sCtx.fillRect(0, 0, 512, 512);
@@ -1009,14 +1083,12 @@
             const skyMesh = new THREE.Mesh(skyGeo, skyMat);
             scene.add(skyMesh);
 
-            // Bola Matahari Bersinar (Diperbesar & Dipercerah)
             const sunGeo = new THREE.SphereGeometry(75, 32, 32);
             const sunMat = new THREE.MeshBasicMaterial({ color: 0xfffbeb, fog: false });
             const sunMesh = new THREE.Mesh(sunGeo, sunMat);
             sunMesh.position.set(450, 360, -650);
             scene.add(sunMesh);
 
-            // Gugusan Awan Putih Lembut di Langit
             const cloudGroup = new THREE.Group();
             const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.88 });
             for (let i = 0; i < 26; i++) {
@@ -1040,7 +1112,6 @@
         }
         const skyClouds = createTropicalSky();
 
-        // Pencahayaan Alami Matahari & Pantulan Laut (Kontras Tinggi)
         const hemiLight = new THREE.HemisphereLight(0xffffff, 0x0284c7, 1.1);
         hemiLight.position.set(0, 200, 0);
         scene.add(hemiLight);
@@ -1061,14 +1132,11 @@
         scene.add(sunLight);
 
         /********************************************************************
-         * 4. LAUTAN BIRU JERNih REALISTIS & GELOMBANG DINAMIS
-         * Menggunakan dua lapisan: dasar laut berpasir dangkal dan permukaan
-         * air biru kristal transparan dengan animasi gelombang Gerstner/Sinus.
+         * 4. LAUTAN BIRU JERNIH REALISTIS & GELOMBANG DINAMIS
          ********************************************************************/
         const OCEAN_SIZE = 1800;
         const OCEAN_SEGMENTS = 160;
 
-        // Dasar Laut Berpasir Terang dengan Jaring Cahaya Caustics agar Air Tampak Hyper-Jernih
         const seabedGeo = new THREE.PlaneGeometry(OCEAN_SIZE, OCEAN_SIZE, 32, 32);
         seabedGeo.rotateX(-Math.PI / 2);
         const seabedMat = new THREE.MeshLambertMaterial({
@@ -1081,11 +1149,9 @@
         seabedMesh.position.y = -4.2;
         scene.add(seabedMesh);
 
-        // Permukaan Laut Jernih Berkilau dengan Tekstur Riak Detail (Bump Map + Vertex Color)
         const waterGeo = new THREE.PlaneGeometry(OCEAN_SIZE, OCEAN_SIZE, OCEAN_SEGMENTS, OCEAN_SEGMENTS);
         waterGeo.rotateX(-Math.PI / 2);
 
-        // Simpan posisi awal verteks & siapkan atribut warna puncak gelombang (foam/crest)
         const waterPosAttr = waterGeo.attributes.position;
         const waterOrigX = new Float32Array(waterPosAttr.count);
         const waterOrigZ = new Float32Array(waterPosAttr.count);
@@ -1100,10 +1166,10 @@
         waterGeo.setAttribute('color', new THREE.BufferAttribute(waterColors, 3));
 
         const waterMat = new THREE.MeshPhongMaterial({
-            color: 0x00c3ff, // Biru cyan tropis yang sangat tajam
-            emissive: 0x00334d, // Kontras gelap di dasar gelombang
+            color: 0x00c3ff,
+            emissive: 0x00334d,
             specular: 0xffffff,
-            shininess: 180, // Pantulan matahari pada air lebih tajam
+            shininess: 180,
             bumpMap: waterRippleTex,
             bumpScale: 0.38,
             vertexColors: true,
@@ -1115,7 +1181,6 @@
         waterMesh.receiveShadow = true;
         scene.add(waterMesh);
 
-        // Fungsi tinggi gelombang air multi-harmonik yang tampak alami
         function getWaveHeight(x, z, time) {
             const w1 = Math.sin(x * 0.035 + time * 1.75) * 0.52;
             const w2 = Math.cos(z * 0.031 - time * 1.4) * 0.44;
@@ -1125,7 +1190,6 @@
         }
 
         function updateOceanWaves(time) {
-            // Geser tekstur riak air dan jaring cahaya bawah air secara real-time
             waterRippleTex.offset.x = time * 0.035;
             waterRippleTex.offset.y = time * 0.025;
             causticsTex.offset.x = Math.sin(time * 0.25) * 0.08 + time * 0.015;
@@ -1138,14 +1202,13 @@
                 const y = getWaveHeight(x, z, time);
                 waterPosAttr.setY(i, y);
 
-                // Gradasi warna air: lembah ombak biru tua jernih, puncak ombak pirus terang berbusa putih
                 const crest = Math.max(0, Math.min(1, (y + 1.1) / 2.3));
                 const foamBoost = Math.pow(crest, 3) * 0.55;
                 colAttr.setXYZ(
                     i,
-                    0.0 + crest * 0.15 + foamBoost,        // Merah ditekan agar cyan/biru dominan
-                    0.4 + crest * 0.45 + foamBoost * 0.6,  // Hijau
-                    0.7 + crest * 0.30 + foamBoost * 0.4   // Biru
+                    0.0 + crest * 0.15 + foamBoost,
+                    0.4 + crest * 0.45 + foamBoost * 0.6,
+                    0.7 + crest * 0.30 + foamBoost * 0.4
                 );
             }
             waterPosAttr.needsUpdate = true;
@@ -1155,8 +1218,6 @@
 
         /********************************************************************
          * 5. PEMBUATAN KAPAL BAJAK LAUT DETAIL (3D SHIP BUILDER)
-         * Lambung kapal melengkung, dek bertingkat, pagar kayu, tiang utama,
-         * layar kain yang berkibar tertiup angin, kemudi, dan meriam.
          ********************************************************************/
         function buildDetailedPirateShip(isEnemy = false) {
             const shipGroup = new THREE.Group();
@@ -1183,12 +1244,11 @@
                 metalness: 0.85
             });
 
-            // 1. Lambung Bawah & Atas (Dibentuk meruncing di haluan depan)
             const hullShape = new THREE.Shape();
-            hullShape.moveTo(0, 7.8); // Ujung haluan depan
+            hullShape.moveTo(0, 7.8);
             hullShape.quadraticCurveTo(2.8, 4.2, 2.7, 0);
-            hullShape.lineTo(2.3, -6.5); // Buritan belakang kanan
-            hullShape.lineTo(-2.3, -6.5); // Buritan belakang kiri
+            hullShape.lineTo(2.3, -6.5);
+            hullShape.lineTo(-2.3, -6.5);
             hullShape.lineTo(-2.7, 0);
             hullShape.quadraticCurveTo(-2.8, 4.2, 0, 7.8);
 
@@ -1208,13 +1268,11 @@
             hullMesh.receiveShadow = true;
             shipGroup.add(hullMesh);
 
-            // Sabuk Emas / Trim Lambung
             const trimGeo = new THREE.BoxGeometry(5.65, 0.28, 12.2);
             const trimMesh = new THREE.Mesh(trimGeo, goldTrimMat);
             trimMesh.position.set(0, 2.1, -0.2);
             shipGroup.add(trimMesh);
 
-            // 2. Dek Buritan Bertingkat (Quarterdeck / Kabin Kapten)
             const cabinGeo = new THREE.BoxGeometry(4.5, 1.9, 4.2);
             const cabinMesh = new THREE.Mesh(cabinGeo, darkWoodMat);
             cabinMesh.position.set(0, 3.1, -4.4);
@@ -1222,28 +1280,24 @@
             cabinMesh.receiveShadow = true;
             shipGroup.add(cabinMesh);
 
-            // Jendela Emas Kabin Belakang
             const winGeo = new THREE.BoxGeometry(3.2, 0.65, 0.2);
             const winMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
             const winMesh = new THREE.Mesh(winGeo, winMat);
             winMesh.position.set(0, 3.2, -6.52);
             shipGroup.add(winMesh);
 
-            // Dek Haluan Depan (Forecastle)
             const foreGeo = new THREE.CylinderGeometry(0.2, 2.3, 3.2, 12);
             foreGeo.rotateX(Math.PI / 2);
             const foreMesh = new THREE.Mesh(foreGeo, darkWoodMat);
             foreMesh.position.set(0, 2.55, 6.2);
             shipGroup.add(foreMesh);
 
-            // Tiang Cucur Haluan (Bowsprit)
             const bowspritGeo = new THREE.CylinderGeometry(0.08, 0.22, 5.5, 8);
             bowspritGeo.rotateX(Math.PI / 2.6);
             const bowsprit = new THREE.Mesh(bowspritGeo, darkWoodMat);
             bowsprit.position.set(0, 3.3, 8.8);
             shipGroup.add(bowsprit);
 
-            // Roda Kemudi Kapal
             const wheelGroup = new THREE.Group();
             const wheelRing = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.07, 8, 16), goldTrimMat);
             wheelGroup.add(wheelRing);
@@ -1255,30 +1309,25 @@
             wheelGroup.position.set(0, 4.6, -2.7);
             shipGroup.add(wheelGroup);
 
-            // Lentera Buritan Bersinar
             const lanternGeo = new THREE.SphereGeometry(0.35, 10, 10);
             const lanternMat = new THREE.MeshBasicMaterial({ color: 0xfde047 });
             const lantern = new THREE.Mesh(lanternGeo, lanternMat);
             lantern.position.set(0, 4.6, -6.6);
             shipGroup.add(lantern);
 
-            // Papan Nama "AL & REY" khusus untuk kapal pemain
             if (!isEnemy) {
-                // Ukuran geometri papan nama diperbesar secara signifikan (hampir 2x lipat)
                 const nameGeo = new THREE.PlaneGeometry(4.0, 0.95);
                 const nameMat = new THREE.MeshStandardMaterial({
                     map: nameplateTex,
                     roughness: 0.4,
-                    metalness: 0.5 // Metalness dinaikkan agar plat emas memantulkan cahaya lebih baik
+                    metalness: 0.5
                 });
                 const nameMesh = new THREE.Mesh(nameGeo, nameMat);
-                // Ditempatkan pas di antara jendela kabin dan lentera belakang
                 nameMesh.position.set(0, 3.95, -6.53); 
-                nameMesh.rotation.y = Math.PI; // Putar 180 derajat menghadap ke belakang
+                nameMesh.rotation.y = Math.PI;
                 shipGroup.add(nameMesh);
             }
 
-            // 3. Empat Meriam Baja di Sisi Kiri dan Kanan Dek
             for (let side = -1; side <= 1; side += 2) {
                 for (let c = 0; c < 2; c++) {
                     const cannonGroup = new THREE.Group();
@@ -1293,7 +1342,6 @@
                 }
             }
 
-            // 4. Dua Tiang Layar Utama & Layar Melengkung yang Berkibar
             const sailMeshes = [];
             const mastPositions = [
                 { z: 1.8, height: 11.5, sailW: 6.4, sailH: 5.2, ySail: 7.4 },
@@ -1301,14 +1349,12 @@
             ];
 
             mastPositions.forEach((m) => {
-                // Tiang Vertikal
                 const mastGeo = new THREE.CylinderGeometry(0.14, 0.26, m.height, 10);
                 const mast = new THREE.Mesh(mastGeo, darkWoodMat);
                 mast.position.set(0, 2.2 + m.height / 2, m.z);
                 mast.castShadow = true;
                 shipGroup.add(mast);
 
-                // Palang Layar Atas & Bawah
                 const yardTop = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, m.sailW + 0.6, 8), darkWoodMat);
                 yardTop.rotation.z = Math.PI / 2;
                 yardTop.position.set(0, m.ySail + m.sailH / 2, m.z);
@@ -1318,13 +1364,11 @@
                 yardBot.position.set(0, m.ySail - m.sailH / 2, m.z);
                 shipGroup.add(yardBot);
 
-                // Geometri Layar dengan banyak segmen agar bisa melengkung tertiup angin
                 const sGeo = new THREE.PlaneGeometry(m.sailW, m.sailH, 12, 10);
                 const sPos = sGeo.attributes.position;
                 for (let i = 0; i < sPos.count; i++) {
                     const u = sPos.getX(i) / (m.sailW / 2);
                     const v = sPos.getY(i) / (m.sailH / 2);
-                    // Lengkungan dasar perut layar ke arah depan (+Z)
                     const curve = (1 - u * u * 0.35) * (1 - v * v) * 1.15;
                     sPos.setZ(i, curve);
                 }
@@ -1343,7 +1387,6 @@
                 sailMeshes.push(sail);
             });
 
-            // Bendera Berkibar di Puncak Tiang Utama
             const flagGeo = new THREE.PlaneGeometry(2.1, 0.95, 8, 4);
             const flagMat = new THREE.MeshLambertMaterial({
                 color: isEnemy ? 0xdc2626 : 0xf59e0b,
@@ -1363,7 +1406,6 @@
             return shipGroup;
         }
 
-        // Fungsi untuk menganimasikan kibaran layar & bendera kapal tertiup angin
         function animateShipSails(shipGroup, time, speedRatio = 0.5) {
             const { sails, flag } = shipGroup.userData;
             if (!sails) return;
@@ -1402,14 +1444,12 @@
         const rockObstacles = [];
         const treasureChests = [];
 
-        // Fungsi pembuat Pohon Kelapa Tropis Melengkung
         function createPalmTree(scale = 1) {
             const palm = new THREE.Group();
             const trunkMat = new THREE.MeshLambertMaterial({ color: 0x6b4423 });
             const leafMat = new THREE.MeshLambertMaterial({ color: 0x2d7a31, side: THREE.DoubleSide });
             const coconutMat = new THREE.MeshLambertMaterial({ color: 0x3f2711 });
 
-            // Batang melengkung dari 7 ruas silinder
             let curX = 0, curY = 0, curZ = 0;
             const bendDir = Math.random() * Math.PI * 2;
             for (let i = 0; i < 7; i++) {
@@ -1430,7 +1470,6 @@
                 curY += Math.cos(tilt) * segH * 0.95;
             }
 
-            // Buah Kelapa di Puncak
             for (let c = 0; c < 3; c++) {
                 const coco = new THREE.Mesh(new THREE.SphereGeometry(0.24, 6, 6), coconutMat);
                 const ca = (c * Math.PI * 2) / 3;
@@ -1438,7 +1477,6 @@
                 palm.add(coco);
             }
 
-            // Daun Pelepah Kelapa Melengkung
             const numLeaves = 8;
             for (let l = 0; l < numLeaves; l++) {
                 const angle = (l * Math.PI * 2) / numLeaves + (Math.random() * 0.2);
@@ -1449,10 +1487,10 @@
                 const leafGeo = new THREE.PlaneGeometry(0.95, 3.8, 2, 6);
                 const lPos = leafGeo.attributes.position;
                 for (let k = 0; k < lPos.count; k++) {
-                    const ly = lPos.getY(k); // -1.9 s/d 1.9
-                    const normY = (ly + 1.9) / 3.8; // 0 di pangkal, 1 di ujung
-                    lPos.setZ(k, -Math.pow(normY, 1.8) * 1.45); // Melengkung jatuh ke bawah
-                    lPos.setX(k, lPos.getX(k) * Math.sin(normY * Math.PI)); // Meruncing di ujung
+                    const ly = lPos.getY(k);
+                    const normY = (ly + 1.9) / 3.8;
+                    lPos.setZ(k, -Math.pow(normY, 1.8) * 1.45);
+                    lPos.setX(k, lPos.getX(k) * Math.sin(normY * Math.PI));
                 }
                 leafGeo.computeVertexNormals();
                 const leaf = new THREE.Mesh(leafGeo, leafMat);
@@ -1467,7 +1505,6 @@
             return palm;
         }
 
-        // Fungsi pembuat Peti Harta Karun Bersinar dengan Pilar Cahaya Emas
         function createTreasureChest(x, y, z, islandName) {
             const group = new THREE.Group();
             group.position.set(x, y, z);
@@ -1481,7 +1518,6 @@
                 roughness: 0.2
             });
 
-            // Kotak Peti & Tutup Melengkung
             const base = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.3, 1.6), boxMat);
             base.position.y = 0.65;
             base.castShadow = true;
@@ -1493,7 +1529,6 @@
             lid.position.y = 1.3;
             group.add(lid);
 
-            // Sabuk Emas Peti
             const band1 = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.45, 1.72), goldMat);
             band1.position.set(-0.85, 0.7, 0);
             const band2 = band1.clone();
@@ -1502,7 +1537,6 @@
             lock.position.set(0, 1.2, 0);
             group.add(band1, band2, lock);
 
-            // Pilar Suar Cahaya Emas ke Langit agar mudah terlihat dari kejauhan
             const beaconGeo = new THREE.CylinderGeometry(1.4, 2.6, 85, 16, 1, true);
             const beaconMat = new THREE.MeshBasicMaterial({
                 color: 0xfde047,
@@ -1515,7 +1549,6 @@
             beacon.position.y = 42;
             group.add(beacon);
 
-            // Cincin Emas Berputar di Sekitar Peti
             const ringGeo = new THREE.RingGeometry(2.8, 3.4, 24);
             ringGeo.rotateX(-Math.PI / 2);
             const ringMat = new THREE.MeshBasicMaterial({
@@ -1540,13 +1573,11 @@
             });
         }
 
-        // Fungsi pembuat Pulau Tropis Lengkap (Pantai Pasir Putih, Bukit Hijau, Pegunungan & Kelapa)
         function createTropicalIsland(config) {
             const { x, z, radius, height, name, chestAngle } = config;
             const islandGroup = new THREE.Group();
             islandGroup.position.set(x, 0, z);
 
-            // 1. Hamparan Pantai Pasir Putih Landai
             const beachGeo = new THREE.CylinderGeometry(radius * 0.78, radius * 1.12, 5.5, 28, 3);
             const bPos = beachGeo.attributes.position;
             for (let i = 0; i < bPos.count; i++) {
@@ -1560,13 +1591,12 @@
                 if (vy > 0) bPos.setY(i, vy + Math.sin(vx * 0.15) * 0.4);
             }
             beachGeo.computeVertexNormals();
-            const beachMat = new THREE.MeshLambertMaterial({ color: 0xffebad, map: sandTex }); // Pasir lebih kuning keemasan/cerah
+            const beachMat = new THREE.MeshLambertMaterial({ color: 0xffebad, map: sandTex });
             const beachMesh = new THREE.Mesh(beachGeo, beachMat);
             beachMesh.position.y = -0.3;
             beachMesh.receiveShadow = true;
             islandGroup.add(beachMesh);
 
-            // 2. Daratan Rumput Tropis Hijau
             const grassGeo = new THREE.ConeGeometry(radius * 0.76, height * 0.55, 24, 3);
             const gPos = grassGeo.attributes.position;
             for (let i = 0; i < gPos.count; i++) {
@@ -1578,15 +1608,14 @@
                 gPos.setZ(i, gz * n);
             }
             grassGeo.computeVertexNormals();
-            const grassMat = new THREE.MeshLambertMaterial({ color: 0x22c55e }); // Rumput hijau emerald lebih pekat dan mencolok
+            const grassMat = new THREE.MeshLambertMaterial({ color: 0x22c55e });
             const grassMesh = new THREE.Mesh(grassGeo, grassMat);
             grassMesh.position.y = 2.4 + (height * 0.55) / 2;
             grassMesh.castShadow = true;
             grassMesh.receiveShadow = true;
             islandGroup.add(grassMesh);
 
-            // 3. Puncak Pegunungan Batu Karang Megah
-            const mountainMat = new THREE.MeshStandardMaterial({ color: 0x44403c, roughness: 0.9, flatShading: true }); // Batuan gunung lebih kontras gelap
+            const mountainMat = new THREE.MeshStandardMaterial({ color: 0x44403c, roughness: 0.9, flatShading: true });
             for (let m = 0; m < 3; m++) {
                 const mRad = radius * (0.38 - m * 0.07);
                 const mH = height * (1.0 - m * 0.18);
@@ -1606,11 +1635,9 @@
                 islandGroup.add(mount);
             }
 
-            // 4. Hutan Pohon Kelapa di Sekeliling Pantai Pulau
             const numPalms = 14;
             for (let p = 0; p < numPalms; p++) {
                 const pa = (p * Math.PI * 2) / numPalms + (Math.random() * 0.25);
-                // Kosongkan sedikit ruang di sekitar titik peti harta karun
                 if (Math.abs(pa - chestAngle) < 0.28) continue;
                 const pr = radius * (0.56 + Math.random() * 0.22);
                 const palm = createPalmTree(0.85 + Math.random() * 0.45);
@@ -1619,7 +1646,6 @@
                 islandGroup.add(palm);
             }
 
-            // 5. Bebatuan Pantai & Dermaga Kayu Kecil Dekat Harta Karun
             const chestDist = radius * 0.84;
             const chestWorldX = x + Math.cos(chestAngle) * chestDist;
             const chestWorldZ = z + Math.sin(chestAngle) * chestDist;
@@ -1634,14 +1660,13 @@
             });
         }
 
-        // Bangun 3 Pulau Tropis Utama Beserta 3 Peti Harta Karun
         createTropicalIsland({
             name: 'Pulau Zamrud',
             x: 0,
             z: -210,
             radius: 68,
             height: 46,
-            chestAngle: Math.PI * 0.5 // Pantai selatan Pulau Zamrud
+            chestAngle: Math.PI * 0.5
         });
 
         createTropicalIsland({
@@ -1650,7 +1675,7 @@
             z: 145,
             radius: 74,
             height: 54,
-            chestAngle: Math.PI * 1.15 // Pantai barat daya
+            chestAngle: Math.PI * 1.15
         });
 
         createTropicalIsland({
@@ -1659,10 +1684,9 @@
             z: 135,
             radius: 70,
             height: 50,
-            chestAngle: Math.PI * 0.15 // Pantai timur
+            chestAngle: Math.PI * 0.15
         });
 
-        // Buat Gugusan Batu Karang Tajam & Terumbu Karang di Lautan (Rintangan)
         function createSeaRocks() {
             const rockMat = new THREE.MeshStandardMaterial({
                 color: 0x57534e,
@@ -1672,7 +1696,6 @@
                 bumpScale: 0.4
             });
 
-            // Material Terumbu Karang yang lebih hidup
             const brainCoralMat = new THREE.MeshStandardMaterial({ color: 0xec4899, roughness: 0.9, bumpMap: rockBumpTex, bumpScale: 0.6 });
             const tubeCoralMat = new THREE.MeshStandardMaterial({ color: 0x8b5cf6, roughness: 0.7 });
             const staghornMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.8 });
@@ -1688,13 +1711,12 @@
                 const rGroup = new THREE.Group();
                 rGroup.position.set(rc.x, 0, rc.z);
 
-                // Membentuk gugusan batu organik (bukan satu bentuk kaku)
                 for(let i=0; i<4; i++) {
                     const rGeo = new THREE.SphereGeometry(rc.r * (0.6 + Math.random()*0.4), 12, 10);
                     const pos = rGeo.attributes.position;
                     for (let j = 0; j < pos.count; j++) {
-                        pos.setY(j, pos.getY(j) * (1.2 + Math.random()*0.5)); // Tarik ke atas
-                        pos.setX(j, pos.getX(j) * (0.8 + Math.random()*0.4)); // Pipihkan sedikit
+                        pos.setY(j, pos.getY(j) * (1.2 + Math.random()*0.5));
+                        pos.setX(j, pos.getX(j) * (0.8 + Math.random()*0.4));
                     }
                     rGeo.computeVertexNormals();
                     const rock = new THREE.Mesh(rGeo, rockMat);
@@ -1705,7 +1727,6 @@
                     rGroup.add(rock);
                 }
 
-                // Tambahkan aneka bentuk terumbu karang di bawah air sekitar pangkal batu
                 for (let c = 0; c < 6; c++) {
                     const ca = (c * Math.PI) / 3;
                     const cDist = rc.r + 1 + Math.random()*2;
@@ -1717,11 +1738,9 @@
                     let coral;
                     
                     if (type === 0) {
-                        // Karang Otak (Brain Coral)
                         coral = new THREE.Mesh(new THREE.SphereGeometry(1.2 + Math.random(), 12, 12), brainCoralMat);
                         coral.scale.set(1, 0.7, 1);
                     } else if (type === 1) {
-                        // Karang Pipa (Tube Coral)
                         coral = new THREE.Group();
                         for(let t=0; t<5; t++) {
                             const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.15, 1.5+Math.random(), 8), tubeCoralMat);
@@ -1730,7 +1749,6 @@
                             coral.add(tube);
                         }
                     } else {
-                        // Karang Bercabang (Staghorn Coral)
                         coral = new THREE.Group();
                         const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.25, 2, 6), staghornMat);
                         coral.add(trunk);
@@ -1762,7 +1780,6 @@
         const seagulls = [];
         function createSeagulls() {
             const wingMat = new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-            const beakMat = new THREE.MeshLambertMaterial({ color: 0xf59e0b });
             
             for (let i = 0; i < 15; i++) {
                 const bird = new THREE.Group();
@@ -1790,32 +1807,26 @@
         }
         createSeagulls();
 
-        // Kehidupan Laut Spesifik (Hiu, Lumba-lumba, Kawanan Kecil)
         const fishList = [];
         function createSpecificSeaLife() {
-            // Hiu (Lebih organik, halus, dan memiliki corak perut terang)
             const sharkMaterial = new THREE.MeshStandardMaterial({ map: sharkTex, roughness: 0.5 });
             for(let i=0; i<4; i++) {
                 const shark = new THREE.Group();
                 
-                // Badan utama (Bentuk tetesan air / torpedo)
                 const bodyGeo = new THREE.SphereGeometry(0.5, 16, 16);
                 const body = new THREE.Mesh(bodyGeo, sharkMaterial);
                 body.scale.set(0.9, 0.9, 3.5);
                 
-                // Kepala membulat meruncing
                 const headGeo = new THREE.SphereGeometry(0.45, 16, 16);
                 const head = new THREE.Mesh(headGeo, sharkMaterial);
                 head.scale.set(0.8, 0.7, 2);
                 head.position.z = 1.6;
 
-                // Sirip punggung (Dorsal)
                 const dorsal = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.2, 4), sharkMaterial);
                 dorsal.scale.set(0.2, 1, 1);
                 dorsal.position.set(0, 0.55, -0.2);
                 dorsal.rotation.x = -0.3;
 
-                // Sirip dada (Pectoral Fins) menyamping
                 const pecGeo = new THREE.ConeGeometry(0.3, 1.4, 4);
                 const leftFin = new THREE.Mesh(pecGeo, sharkMaterial);
                 leftFin.scale.set(1, 0.1, 0.6);
@@ -1827,7 +1838,6 @@
                 rightFin.position.set(0.5, -0.2, 0.8);
                 rightFin.rotation.set(0, 0.4, -0.4);
 
-                // Ekor (Caudal fin asimetris hiu)
                 const tailGroup = new THREE.Group();
                 const tailTop = new THREE.Mesh(new THREE.ConeGeometry(0.25, 1.5, 4), sharkMaterial);
                 tailTop.scale.set(0.2, 1, 1);
@@ -1836,7 +1846,7 @@
                 const tailBot = new THREE.Mesh(new THREE.ConeGeometry(0.2, 1.0, 4), sharkMaterial);
                 tailBot.scale.set(0.2, 1, 1);
                 tailBot.position.set(0, -0.3, -0.2);
-                tailBot.rotation.x = -2.5; // Menunjuk ke bawah belakang
+                tailBot.rotation.x = -2.5;
                 tailGroup.add(tailTop, tailBot);
                 tailGroup.position.z = -2.0;
 
@@ -1852,7 +1862,6 @@
                 });
             }
 
-            // Lumba-lumba (Melengkung, halus, hidung moncong jelas)
             const dolphinMat = new THREE.MeshStandardMaterial({ map: dolphinTex, roughness: 0.4, metalness: 0.2 });
             for(let i=0; i<4; i++) {
                 const dolphin = new THREE.Group();
@@ -1860,23 +1869,19 @@
                 const body = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), dolphinMat);
                 body.scale.set(0.8, 0.9, 2.8);
                 
-                // Moncong (Beak) khas lumba-lumba
                 const beak = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 0.7, 8), dolphinMat);
                 beak.rotation.x = Math.PI / 2;
                 beak.position.set(0, -0.05, 1.3);
 
-                // Dahi cembung (Melon)
                 const melon = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), dolphinMat);
                 melon.scale.set(0.9, 0.9, 1.2);
                 melon.position.set(0, 0.1, 0.9);
 
-                // Sirip punggung melengkung
                 const fin = new THREE.Mesh(new THREE.ConeGeometry(0.25, 0.8, 4), dolphinMat);
                 fin.scale.set(0.2, 1, 1);
                 fin.position.set(0, 0.45, -0.2);
                 fin.rotation.x = -0.4;
                 
-                // Sirip ekor mendatar
                 const tailGroup = new THREE.Group();
                 const tailFluke = new THREE.Mesh(new THREE.ConeGeometry(0.4, 1.2, 4), dolphinMat);
                 tailFluke.scale.set(1.5, 0.1, 0.8);
@@ -1896,7 +1901,6 @@
                 });
             }
 
-            // Kawanan Ikan Kecil (Material Iridescent mengkilap yang bereaksi terhadap cahaya)
             const fishMat = new THREE.MeshPhysicalMaterial({ 
                 color: 0x38bdf8, metalness: 0.8, roughness: 0.2, 
                 iridescence: 1.0, iridescenceIOR: 1.5 
@@ -1939,7 +1943,7 @@
         const playerState = {
             x: 0,
             z: 40,
-            heading: Math.PI, // Menghadap ke Utara (-Z) ke arah Pulau Zamrud
+            heading: Math.PI,
             speed: 0,
             maxSpeed: 28,
             turnRate: 1.55,
@@ -1951,7 +1955,6 @@
             fireCooldown: 0.75
         };
 
-        // Daftar Kapal Bajak Laut Musuh yang Berpatroli
         const enemyShips = [];
         const enemyPatrolConfigs = [
             { x: -65, z: -130, patrolX: -65, patrolZ: -130, radius: 55 },
@@ -1960,7 +1963,6 @@
         ];
 
         function spawnEnemyShips() {
-            // Hapus musuh lama jika restart
             enemyShips.forEach(e => scene.remove(e.mesh));
             enemyShips.length = 0;
 
@@ -1986,7 +1988,6 @@
         }
         spawnEnemyShips();
 
-        // Peluru Meriam & Efek Partikel Air / Ledakan
         const cannonballs = [];
         const particles = [];
         const wakeParticles = [];
@@ -2021,17 +2022,14 @@
         }
 
         function fireShipCannons(shooterX, shooterZ, shooterHeading, sideMode, isPlayer) {
-            // sideMode: 'left', 'right', atau 'both'
             const sides = sideMode === 'both' ? [-1, 1] : (sideMode === 'left' ? [1] : [-1]);
             audioSys.playCannonSound();
 
             sides.forEach((sideSign) => {
-                // Sudut tembakan tegak lurus lambung kapal
                 const fireAngle = shooterHeading + sideSign * (Math.PI / 2);
                 const dirX = Math.sin(fireAngle);
                 const dirZ = Math.cos(fireAngle);
 
-                // Tembakkan 2 meriam per sisi
                 for (let barrel = -1; barrel <= 1; barrel += 2) {
                     const offsetForward = barrel * 1.4;
                     const startX = shooterX + Math.sin(shooterHeading) * offsetForward + dirX * 2.6;
@@ -2041,7 +2039,6 @@
                     ball.position.set(startX, 3.0, startZ);
                     scene.add(ball);
 
-                    // Kepulan asap meriam
                     spawnParticleBurst(startX, 3.0, startZ, 0xe5e7eb, 6, 0.55);
 
                     cannonballs.push({
@@ -2062,12 +2059,11 @@
          * 9. KONTROL PEMAIN (JOYSTICK VIRTUAL, KEYBOARD & KAMERA SINEMATIK)
          ********************************************************************/
         const inputState = {
-            forward: 0, // -1 (mundur) s/d +1 (maju)
-            turn: 0,    // -1 (kanan) s/d +1 (kiri)
+            forward: 0,
+            turn: 0,
             keys: {}
         };
 
-        // Keyboard Listeners
         window.addEventListener('keydown', (e) => {
             const k = e.key.toLowerCase();
             inputState.keys[k] = true;
@@ -2087,13 +2083,12 @@
             inputState.keys[e.key.toLowerCase()] = false;
         });
 
-        // Joystick Virtual Sentuh & Mouse
         const joystickZone = document.getElementById('joystick-zone');
         const joystickKnob = document.getElementById('joystick-knob');
         let joystickActive = false;
         let joystickPointerId = null;
-        let joyInputX = 0; // -1 kiri, +1 kanan
-        let joyInputY = 0; // +1 maju, -1 mundur
+        let joyInputX = 0;
+        let joyInputY = 0;
 
         function updateJoystickFromPoint(clientX, clientY) {
             const rect = joystickZone.getBoundingClientRect();
@@ -2112,7 +2107,7 @@
 
             joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
             joyInputX = dx / maxRadius;
-            joyInputY = -dy / maxRadius; // Atas = maju (+1)
+            joyInputY = -dy / maxRadius;
         }
 
         function resetJoystick() {
@@ -2140,7 +2135,6 @@
         joystickZone.addEventListener('pointerup', resetJoystick);
         joystickZone.addEventListener('pointercancel', resetJoystick);
 
-        // Kamera Sinematik Mengikuti Kapal dengan Orbit Drag Opsional
         let camOrbitYaw = 0;
         let camOrbitPitch = 0.38;
         let isDraggingCam = false;
@@ -2162,7 +2156,42 @@
             camOrbitYaw -= dx * 0.006;
         });
 
-        // Tombol Meriam & Teriakan Bajak Laut di Layar
+        window.addEventListener('pointerup', () => {
+            isDraggingCam = false;
+        });
+
+        document.getElementById('btn-reset-cam').addEventListener('click', () => {
+            camOrbitYaw = 0;
+            camOrbitPitch = 0.38;
+        });
+
+        // Fungsi Layar Penuh & Kunci Orientasi Landscape 16:9 pada Smartphone
+        async function requestLandscape16by9() {
+            try {
+                const docEl = document.documentElement;
+                if (!document.fullscreenElement && docEl.requestFullscreen) {
+                    await docEl.requestFullscreen();
+                } else if (!document.webkitFullscreenElement && docEl.webkitRequestFullscreen) {
+                    await docEl.webkitRequestFullscreen();
+                }
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('landscape').catch(() => {});
+                }
+            } catch (err) {
+                // Abaikan jika dibatasi oleh iframe atau browser
+            }
+            setTimeout(sync16by9Viewport, 120);
+        }
+
+        document.getElementById('btn-fullscreen').addEventListener('click', () => {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            } else {
+                requestLandscape16by9();
+            }
+        });
+
         function triggerPirateShout(category = 'random') {
             audioSys.init();
             const phrase = audioSys.playPirateShout(category);
@@ -2187,7 +2216,6 @@
         document.getElementById('btn-fire-both').addEventListener('click', () => triggerPlayerFire('both'));
         document.getElementById('btn-pirate-shout').addEventListener('click', () => triggerPirateShout('random'));
 
-        // Pengaturan Audio & Mute
         document.getElementById('btn-mute').addEventListener('click', () => {
             audioSys.init();
             const muted = audioSys.toggleMute();
@@ -2240,9 +2268,9 @@
 
             const remaining = 3 - playerState.treasuresCollected;
             if (remaining > 0) {
-                missionText.textContent = `Temukan ${remaining} Peti Harta Karun lagi!`;
+                missionText.textContent = `Cari ${remaining} Peti Harta lagi!`;
             } else {
-                missionText.textContent = `Seluruh Harta Karun Ditemukan!`;
+                missionText.textContent = `Semua Harta Ditemukan!`;
             }
 
             for (let i = 0; i < 3; i++) {
@@ -2257,24 +2285,21 @@
             }
         }
 
-        // Menggambar Peta Kecil (Minimap Radar)
         function drawMinimap() {
             const w = minimapCanvas.width;
             const h = minimapCanvas.height;
             const cx = w / 2;
             const cy = h / 2;
-            const mapScale = 0.17; // Konversi koordinat dunia ke piksel minimap
+            const mapScale = 0.17;
 
             mCtx.clearRect(0, 0, w, h);
 
-            // Latar kompas radar laut
             const grad = mCtx.createRadialGradient(cx, cy, 10, cx, cy, cx);
             grad.addColorStop(0, '#0e4f70');
             grad.addColorStop(1, '#062639');
             mCtx.fillStyle = grad;
             mCtx.fillRect(0, 0, w, h);
 
-            // Lingkaran grid radar
             mCtx.strokeStyle = 'rgba(251, 191, 36, 0.2)';
             mCtx.lineWidth = 1;
             [28, 54].forEach(r => {
@@ -2283,7 +2308,6 @@
                 mCtx.stroke();
             });
 
-            // Gambar Pulau Tropis
             islands.forEach(isl => {
                 const ix = cx + (isl.x - playerState.x) * mapScale;
                 const iy = cy + (isl.z - playerState.z) * mapScale;
@@ -2300,7 +2324,6 @@
                 mCtx.fill();
             });
 
-            // Gambar Batu Karang
             mCtx.fillStyle = '#9ca3af';
             rockObstacles.forEach(rk => {
                 const rx = cx + (rk.x - playerState.x) * mapScale;
@@ -2310,7 +2333,6 @@
                 mCtx.fill();
             });
 
-            // Gambar Kapal Musuh (Titik Merah)
             enemyShips.forEach(enemy => {
                 if (!enemy.alive) return;
                 const ex = cx + (enemy.x - playerState.x) * mapScale;
@@ -2321,7 +2343,6 @@
                 mCtx.fill();
             });
 
-            // Gambar Peti Harta Karun (Titik Emas Berkedip)
             const pulse = 3.5 + Math.sin(performance.now() * 0.008) * 1.3;
             treasureChests.forEach(tc => {
                 if (tc.collected) return;
@@ -2336,10 +2357,8 @@
                 mCtx.stroke();
             });
 
-            // Gambar Kapal Pemain di Pusat Radar (Segitiga Hijau Terang)
             mCtx.save();
             mCtx.translate(cx, cy);
-            // Karena di dunia 3D heading=PI menghadap Utara (-Z), rotasi ikon di peta:
             mCtx.rotate(Math.PI - playerState.heading);
             mCtx.fillStyle = '#34d399';
             mCtx.beginPath();
@@ -2416,26 +2435,26 @@
 
         document.getElementById('btn-start-game').addEventListener('click', () => {
             audioSys.init();
+            requestLandscape16by9();
             startOverlay.classList.add('hidden');
             resetGame();
         });
 
         document.getElementById('btn-restart-game').addEventListener('click', () => {
             audioSys.init();
+            requestLandscape16by9();
             resetGame();
         });
 
         /********************************************************************
-         * 12. LOOP SIMULASI UTAMA (PHYSICS, AI MUSUH, ANIMASI & RENDER)
+         * 12. LOOP SIMULASI UTAMA & URUTAN INITIAL LOADING 16:9
          ********************************************************************/
         const clock = new THREE.Clock();
 
         function updateGame(dt, elapsedTime) {
-            // 1. Update Ombak Laut & Awan Langit
             updateOceanWaves(elapsedTime);
             skyClouds.rotation.y = elapsedTime * 0.008;
 
-            // 2. Animasi Burung Camar Putih Terbang Melingkar
             seagulls.forEach((b) => {
                 b.angle += b.speed * dt;
                 const bx = b.cx + Math.cos(b.angle) * b.orbitRadius;
@@ -2443,21 +2462,17 @@
                 const by = b.height + Math.sin(elapsedTime * 1.5 + b.flapOffset) * 2.5;
                 b.mesh.position.set(bx, by, bz);
 
-                // Arah hadap burung sesuai garis singgung orbit
                 const tangentAngle = b.angle + (b.speed > 0 ? Math.PI / 2 : -Math.PI / 2);
                 b.mesh.rotation.y = Math.PI / 2 - tangentAngle;
 
-                // Kepakan sayap
                 const flap = Math.sin(elapsedTime * 9 + b.flapOffset) * 0.45;
                 b.leftWing.rotation.z = flap;
                 b.rightWing.rotation.z = -flap;
             });
 
-            // 3. Animasi Kawanan Ikan Tropis (Hiu, Lumba-lumba, dan Kawanan Kecil)
             fishList.forEach((f) => {
                 f.angle += f.speed * dt;
                 
-                // Kapal pemain tidak lagi dikerubuti, semua ikan punya rute mandiri
                 const fx = f.cx + Math.cos(f.angle) * f.radius;
                 const fz = f.cz + Math.sin(f.angle) * f.radius;
                 const surfaceY = getWaveHeight(fx, fz, elapsedTime);
@@ -2465,13 +2480,11 @@
                 let leap = 0;
                 let pitch = 0;
                 if (f.type === 'dolphin') {
-                    // Lumba-lumba melompat tinggi
                     leap = Math.max(0, Math.sin(elapsedTime * 1.5 + f.phase) - 0.7) * 4.0;
                     if (leap > 0.1) pitch = -Math.sin(elapsedTime * 1.5 + f.phase) * 0.8;
                 } else if (f.type === 'shark') {
-                    leap = 0; // Hiu menyisir konstan di bawah air
+                    leap = 0;
                 } else {
-                    // Ikan kecil melompat tipis sesekali
                     leap = Math.max(0, Math.sin(elapsedTime * 2.2 + f.phase) - 0.9) * 1.2;
                 }
                 
@@ -2487,20 +2500,17 @@
                 }
             });
 
-            // 4. Animasi Kilau Peti Harta Karun
             treasureChests.forEach((tc) => {
                 if (tc.collected) return;
                 tc.ring.rotation.z = elapsedTime * 1.5;
                 const scalePulse = 1 + Math.sin(elapsedTime * 3.5) * 0.15;
                 tc.ring.scale.set(scalePulse, scalePulse, 1);
                 
-                // Pilar cahaya emas berkedip tajam agar mudah ditemukan
                 const flash = Math.pow(Math.max(0, Math.sin(elapsedTime * 3.2)), 16) * 0.75;
                 const baseOpacity = 0.2 + Math.sin(elapsedTime * 1.5) * 0.08;
                 tc.beacon.material.opacity = baseOpacity + flash;
             });
 
-            // 5. Kontrol & Pergerakan Kapal Pemain
             if (gameRunning) {
                 let targetForward = joyInputY;
                 let targetTurn = -joyInputX;
@@ -2513,25 +2523,20 @@
                 const desiredSpeed = targetForward * playerState.maxSpeed;
                 playerState.speed += (desiredSpeed - playerState.speed) * Math.min(1, dt * 2.5);
 
-                // Kemudi kapal berbelok
                 const turnFactor = 0.45 + 0.55 * (Math.abs(playerState.speed) / playerState.maxSpeed);
                 playerState.heading += targetTurn * playerState.turnRate * turnFactor * dt;
 
-                // Roda kemudi kapal berputar visual
                 if (playerShip.userData.wheel) {
                     playerShip.userData.wheel.rotation.z += targetTurn * dt * 3.5;
                 }
 
-                // Update posisi kapal
                 let nextX = playerState.x + Math.sin(playerState.heading) * playerState.speed * dt;
                 let nextZ = playerState.z + Math.cos(playerState.heading) * playerState.speed * dt;
 
-                // Batas wilayah lautan
                 const bound = 440;
                 nextX = Math.max(-bound, Math.min(bound, nextX));
                 nextZ = Math.max(-bound, Math.min(bound, nextZ));
 
-                // Deteksi koleksi Peti Harta Karun (SEBELUM pantulan pantai pulau)
                 treasureChests.forEach((tc) => {
                     if (tc.collected) return;
                     const distToChest = Math.hypot(nextX - tc.x, nextZ - tc.z);
@@ -2552,7 +2557,6 @@
                     }
                 });
 
-                // Deteksi Tumbukan dengan Pantai Pulau
                 islands.forEach((isl) => {
                     const dx = nextX - isl.x;
                     const dz = nextZ - isl.z;
@@ -2567,7 +2571,6 @@
                     }
                 });
 
-                // Deteksi Tumbukan dengan Batu Karang Tajam
                 rockObstacles.forEach((rk) => {
                     const dx = nextX - rk.x;
                     const dz = nextZ - rk.z;
@@ -2594,7 +2597,6 @@
                 playerState.x = nextX;
                 playerState.z = nextZ;
 
-                // Jejak buih air di belakang buritan kapal saat melaju
                 if (Math.abs(playerState.speed) > 4 && Math.random() < 0.65) {
                     const sternX = playerState.x - Math.sin(playerState.heading) * 6.5 + (Math.random() - 0.5) * 2.2;
                     const sternZ = playerState.z - Math.cos(playerState.heading) * 6.5 + (Math.random() - 0.5) * 2.2;
@@ -2612,7 +2614,6 @@
                 }
             }
 
-            // Terapkan Posisi & Guncangan Ombak Realistis pada Kapal Pemain
             const waveY = getWaveHeight(playerState.x, playerState.z, elapsedTime);
             const waveAhead = getWaveHeight(
                 playerState.x + Math.sin(playerState.heading) * 4,
@@ -2633,27 +2634,23 @@
 
             animateShipSails(playerShip, elapsedTime, Math.abs(playerState.speed) / playerState.maxSpeed);
 
-            // 6. Update Kapal Bajak Laut Musuh (AI Patroli & Menembak)
             enemyShips.forEach((enemy) => {
                 if (!enemy.alive) return;
 
                 const distToPlayer = Math.hypot(playerState.x - enemy.x, playerState.z - enemy.z);
 
                 if (gameRunning && distToPlayer < 135) {
-                    // Kejar & arahkan lambung kapal ke pemain
                     const targetAngle = Math.atan2(playerState.x - enemy.x, playerState.z - enemy.z);
                     let angleDiff = targetAngle - enemy.heading;
                     while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
                     while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
                     enemy.heading += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), dt * 0.95);
 
-                    // Tembakkan meriam jika dalam jarak tembak
                     if (distToPlayer < 88 && elapsedTime - enemy.lastFire > 3.2) {
                         enemy.lastFire = elapsedTime;
                         fireShipCannons(enemy.x, enemy.z, enemy.heading, 'both', false);
                     }
                 } else {
-                    // Patroli melingkar
                     enemy.patrolAngle += 0.22 * dt;
                     const tx = enemy.patrolX + Math.cos(enemy.patrolAngle) * 48;
                     const tz = enemy.patrolZ + Math.sin(enemy.patrolAngle) * 48;
@@ -2663,7 +2660,6 @@
                 let enx = enemy.x + Math.sin(enemy.heading) * enemy.speed * dt;
                 let enz = enemy.z + Math.cos(enemy.heading) * enemy.speed * dt;
 
-                // Hindari pulau
                 islands.forEach((isl) => {
                     const d = Math.hypot(enx - isl.x, enz - isl.z);
                     const minD = isl.collisionRadius + 8;
@@ -2685,10 +2681,9 @@
                 animateShipSails(enemy.mesh, elapsedTime, 0.6);
             });
 
-            // 7. Update Peluru Meriam & Deteksi Tembakan
             for (let i = cannonballs.length - 1; i >= 0; i--) {
                 const cb = cannonballs[i];
-                cb.vy -= 18.5 * dt; // Gravitasi
+                cb.vy -= 18.5 * dt;
                 cb.x += cb.vx * dt;
                 cb.y += cb.vy * dt;
                 cb.z += cb.vz * dt;
@@ -2697,7 +2692,6 @@
                 let hit = false;
 
                 if (cb.isPlayer) {
-                    // Cek apakah mengenai kapal bajak laut musuh
                     for (let j = 0; j < enemyShips.length; j++) {
                         const en = enemyShips[j];
                         if (!en.alive) continue;
@@ -2720,7 +2714,6 @@
                         }
                     }
                 } else if (gameRunning) {
-                    // Cek apakah mengenai kapal pemain
                     if (Math.hypot(cb.x - playerState.x, cb.z - playerState.z) < 6.2 && cb.y < 8) {
                         hit = true;
                         playerState.health = Math.max(0, playerState.health - 12);
@@ -2731,7 +2724,6 @@
                     }
                 }
 
-                // Jatuh ke air laut
                 if (!hit && cb.y <= getWaveHeight(cb.x, cb.z, elapsedTime)) {
                     hit = true;
                     spawnParticleBurst(cb.x, 0.5, cb.z, 0xe0f2fe, 10, 0.65);
@@ -2743,7 +2735,6 @@
                 }
             }
 
-            // 8. Update Partikel Ledakan & Buih Ombak
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.life -= dt;
@@ -2771,7 +2762,6 @@
                 wp.mesh.material.opacity = wp.life * 0.5;
             }
 
-            // 9. Kamera Sinematik Halus Mengikuti Kapal Pemain
             const camAngle = playerState.heading + Math.PI + camOrbitYaw;
             const camDist = 27;
             const camHeight = 8 + camOrbitPitch * 22;
@@ -2788,18 +2778,15 @@
             const lookTargetZ = playerState.z + Math.cos(playerState.heading) * 6;
             camera.lookAt(lookTargetX, waveY + 3.2, lookTargetZ);
 
-            // 10. Gambar Radar Minimap
             drawMinimap();
         }
 
-        // Penanganan Resize Layar Responsif
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        // Penanganan Resize & Perubahan Orientasi Smartphone secara Real-Time
+        window.addEventListener('resize', sync16by9Viewport);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(sync16by9Viewport, 150);
         });
 
-        // Mulai Loop Animasi Utama pada Window Onload
         function animateLoop() {
             requestAnimationFrame(animateLoop);
             const dt = Math.min(clock.getDelta(), 0.1);
@@ -2808,12 +2795,41 @@
             renderer.render(scene, camera);
         }
 
+        // Urutan Inisialisasi Awal (Initial Loading Calibration 16:9)
         window.onload = function () {
-            // Set posisi awal kamera menghadap kapal
+            const loadingScreen = document.getElementById('loading-screen');
+            const loadingProgress = document.getElementById('loading-progress');
+            const loadingStatus = document.getElementById('loading-status');
+
+            // 1. Kalibrasi panggung 16:9 sejak frame pertama
+            sync16by9Viewport();
             camera.position.set(0, 18, 68);
             camera.lookAt(0, 3, 30);
             updateHUD();
+
+            // 2. Render frame perdana dan jalankan loop di latar belakang
             animateLoop();
+
+            // 3. Progres pemuatan aset & sinkronisasi viewport smartphone
+            let progress = 25;
+            const loadInterval = setInterval(() => {
+                progress += 25;
+                sync16by9Viewport();
+                loadingProgress.style.width = `${Math.min(100, progress)}%`;
+
+                if (progress === 50) {
+                    loadingStatus.textContent = 'Memuat Pulau Tropis & Kapal Al & Rey...';
+                } else if (progress === 75) {
+                    loadingStatus.textContent = 'Mengoptimalkan Rasio Layar 16:9 Smartphone...';
+                } else if (progress >= 100) {
+                    clearInterval(loadInterval);
+                    loadingStatus.textContent = 'Siap Berlayar!';
+                    setTimeout(() => {
+                        loadingScreen.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => loadingScreen.classList.add('hidden'), 500);
+                    }, 220);
+                }
+            }, 180);
         };
     </script>
 </body>
